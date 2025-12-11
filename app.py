@@ -3,20 +3,19 @@ import pickle
 import streamlit as st
 import streamlit_authenticator as sa
 
-### USER AUTHNTICATION ###
+### USER AUTHENTICATION ###
+
+# User information
 names = ['Peter Parker', 'Rebecca Miller']
 usernames = ['pparker', 'rmiller']
 passwords = ['abc123', 'def456']
 
-hashed_passwords = sa.Hasher(passwords).generate()
-
-# store the password into pickle file
-file_path = Path(__file__).parent / 'hashed_pw.pk1'
-
-with file_path.open('rb') as file:
+# Load hashed passwords (you already created this file earlier)
+file_path = Path(__file__).parent / "hashed_pw.pkl"
+with file_path.open("rb") as file:
     hashed_passwords = pickle.load(file)
 
-# Build credentials dictionary (NEW format)
+# New credentials dictionary format
 credentials = {
     "usernames": {
         usernames[0]: {
@@ -30,26 +29,32 @@ credentials = {
     }
 }
 
-# Create authenticator (NEW signature)
+# Authenticator (new signature)
 authenticator = sa.Authenticate(
     credentials,
-    "sales_dashboard",  # cookie name
-    "abcdef",           # cookie key
+    "sales_dashboard",
+    "abcdef",
     cookie_expiry_days=30
 )
 
-name, authentication_status, username = authenticator.login("Login", "main")
+# NEW login format (fields replaces form_name)
+fields = {"Form name": "Login"}
 
-if authentication_status == False:
+name, authentication_status, username = authenticator.login(fields=fields)
+
+# Login status messages
+if authentication_status is False:
     st.error("Username/password is incorrect")
 
-if authentication_status == None:
+elif authentication_status is None:
     st.warning("Please enter your username and password")
-    
-if authentication_status:
+
+# Successful login
+else:
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
     st.write("You are logged in!")
+
 
 
 
@@ -59,3 +64,4 @@ if authentication_status:
 # streamlit run app_2.py
 
     
+
