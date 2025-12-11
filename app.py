@@ -16,10 +16,27 @@ file_path = Path(__file__).parent / 'hashed_pw.pk1'
 with file_path.open('rb') as file:
     hashed_passwords = pickle.load(file)
 
-authenticator = sa.Authenticate(names, usernames, hashed_passwords,
-    "sales_dashboard", "abcdef", 
+# Build credentials dictionary (NEW format)
+credentials = {
+    "usernames": {
+        usernames[0]: {
+            "name": names[0],
+            "password": hashed_passwords[0],
+        },
+        usernames[1]: {
+            "name": names[1],
+            "password": hashed_passwords[1],
+        },
+    }
+}
+
+# Create authenticator (NEW signature)
+authenticator = sa.Authenticate(
+    credentials,
+    "sales_dashboard",  # cookie name
+    "abcdef",           # cookie key
     cookie_expiry_days=30
-    )
+)
 
 name, authentication_status, username = authenticator.login("Login", "main")
 
@@ -32,7 +49,7 @@ if authentication_status == None:
 if authentication_status:
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
-    
+    st.write("You are logged in!")
 
 
 
@@ -40,4 +57,5 @@ if authentication_status:
 # bcrypt as hashing method
 # cd login_form
 # streamlit run app_2.py
+
     
